@@ -41,6 +41,10 @@ app.use(
 );
 app.use(bodyParser.json());
 
+app.get("/", (_req, res) => {
+  res.send("Backend is running");
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
