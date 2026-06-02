@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import axios from "axios";
 import "./styles.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api/chat";
+const baseURL = (import.meta.env.VITE_BASE_URL || "http://localhost:5001").replace(/\/$/, "");
+const API_URL = `${baseURL}/chat`;
 
 function App() {
   const [messages, setMessages] = React.useState([

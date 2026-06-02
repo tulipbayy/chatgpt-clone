@@ -14,11 +14,23 @@ const openai = new OpenAI({
 });
 
 const localDevOrigin = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
+const netlifyOrigin = /^https:\/\/[a-z0-9-]+\.netlify\.app$/;
+const allowedOrigins = new Set(
+  (process.env.CLIENT_ORIGIN || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+);
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || localDevOrigin.test(origin)) {
+      if (
+        !origin ||
+        localDevOrigin.test(origin) ||
+        netlifyOrigin.test(origin) ||
+        allowedOrigins.has(origin)
+      ) {
         callback(null, true);
         return;
       }
@@ -33,7 +45,7 @@ app.get("/api/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/chat", async (req, res) => {
+async function handleChat(req, res) {
   const { messages } = req.body;
 
   if (!Array.isArray(messages)) {
@@ -68,7 +80,10 @@ app.post("/api/chat", async (req, res) => {
     console.error("OpenAI request failed:", error);
     res.status(500).json({ error: "Failed to get a chatbot response" });
   }
-});
+}
+
+app.post("/chat", handleChat);
+app.post("/api/chat", handleChat);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
